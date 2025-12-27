@@ -1,6 +1,6 @@
 name: flutter_uhf_plugin
 description: A Flutter plugin for Senter UHF RFID readers. Supports tag inventory, power control, and continuous reading for Android devices.
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/jehadja/senter-uhf-2d
 repository: https://github.com/jehadja/senter-uhf-2d
 issue_tracker: https://github.com/jehadja/senter-uhf-2d/issues
