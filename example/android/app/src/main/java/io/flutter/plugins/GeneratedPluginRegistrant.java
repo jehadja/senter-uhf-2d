@@ -16,9 +16,9 @@ public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
     try {
-      flutterEngine.getPlugins().add(new com.example.flutter_uhf_plugin.FlutterUhfPlugin());
+      flutterEngine.getPlugins().add(new com.transforat.flutter_uhf_plugin.FlutterUhfPlugin());
     } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin flutter_uhf_plugin, com.example.flutter_uhf_plugin.FlutterUhfPlugin", e);
+      Log.e(TAG, "Error registering plugin flutter_uhf_plugin, com.transforat.flutter_uhf_plugin.FlutterUhfPlugin", e);
     }
   }
 }
