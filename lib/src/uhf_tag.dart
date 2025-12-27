@@ -59,8 +59,38 @@ class UhfTag {
   @override
   int get hashCode => epc.hashCode;
 
+  /// Convert EPC hex string to decimal (BigInt for large values)
+  /// Returns the decimal representation of the EPC
+  BigInt get epcDecimal {
+    final cleanHex = epc.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
+    if (cleanHex.isEmpty) return BigInt.zero;
+    return BigInt.parse(cleanHex, radix: 16);
+  }
+
+  /// Convert EPC hex string to decimal string
+  String get epcDecimalString => epcDecimal.toString();
+
+  /// Get the last N digits of the decimal EPC (useful for short IDs)
+  String epcDecimalLast(int digits) {
+    final decimal = epcDecimalString;
+    if (decimal.length <= digits) return decimal;
+    return decimal.substring(decimal.length - digits);
+  }
+
+  /// Static utility to convert any hex string to decimal
+  static BigInt hexToDecimal(String hex) {
+    final cleanHex = hex.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
+    if (cleanHex.isEmpty) return BigInt.zero;
+    return BigInt.parse(cleanHex, radix: 16);
+  }
+
+  /// Static utility to convert decimal to hex string
+  static String decimalToHex(BigInt decimal) {
+    return decimal.toRadixString(16).toUpperCase();
+  }
+
   @override
   String toString() {
-    return 'UhfTag(epc: $epc, rssi: $rssi, readCount: $readCount)';
+    return 'UhfTag(epc: $epc, epcDecimal: $epcDecimalString, rssi: $rssi, readCount: $readCount)';
   }
 }
