@@ -70,6 +70,35 @@ class UhfTag {
   /// Convert EPC hex string to decimal string
   String get epcDecimalString => epcDecimal.toString();
 
+  /// Get the serial number from the last N hex characters of the EPC
+  /// For most RFID tags, the serial is in the last 6-8 hex chars
+  /// Example: EPC "E20011223344ED4D57" with lastHexChars=6 -> "ED4D57" -> 15551831
+  BigInt getSerialNumber({int lastHexChars = 6}) {
+    final cleanHex = epc.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
+    if (cleanHex.isEmpty) return BigInt.zero;
+    final start = cleanHex.length > lastHexChars 
+        ? cleanHex.length - lastHexChars 
+        : 0;
+    final serialHex = cleanHex.substring(start);
+    return BigInt.parse(serialHex, radix: 16);
+  }
+
+  /// Get serial number as string
+  String getSerialNumberString({int lastHexChars = 6}) {
+    return getSerialNumber(lastHexChars: lastHexChars).toString();
+  }
+
+  /// Extract serial from specific byte range (start and end are hex character positions)
+  /// Example: extractHexRange(14, 20) extracts chars 14-19 (6 chars)
+  BigInt extractHexRange(int start, int end) {
+    final cleanHex = epc.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
+    if (cleanHex.isEmpty || start >= cleanHex.length) return BigInt.zero;
+    final actualEnd = end > cleanHex.length ? cleanHex.length : end;
+    final extracted = cleanHex.substring(start, actualEnd);
+    if (extracted.isEmpty) return BigInt.zero;
+    return BigInt.parse(extracted, radix: 16);
+  }
+
   /// Get the last N digits of the decimal EPC (useful for short IDs)
   String epcDecimalLast(int digits) {
     final decimal = epcDecimalString;
