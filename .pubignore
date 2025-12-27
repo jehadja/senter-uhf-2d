@@ -1,0 +1,24 @@
+# Build artifacts
+example/build/
+example/.dart_tool/
+example/android/.gradle/
+example/android/app/build/
+example/android/build/
+.dart_tool/
+build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# macOS
+.DS_Store
+
+# Generated files
+*.g.dart
+*.freezed.dart
+
+# Intermediate files
+example/android/.cxx/
+example/android/flutter_uhf_plugin/
