@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_uhf_plugin/flutter_uhf_plugin.dart';
+import 'permissions_helper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -76,6 +77,19 @@ class _UhfReaderPageState extends State<UhfReaderPage> {
   }
 
   Future<void> _initReader() async {
+    setState(() => _statusMessage = 'Checking permissions...');
+    
+    // Request permissions first
+    final hasPermissions = await PermissionsHelper.requestUhfPermissions();
+    
+    if (!hasPermissions) {
+      setState(() {
+        _statusMessage = 'Permissions denied - Please grant Bluetooth and Location permissions';
+        _state = UhfReaderState.error;
+      });
+      return;
+    }
+    
     setState(() => _statusMessage = 'Initializing...');
     
     final success = await _reader.init();

@@ -23,6 +23,15 @@ class UhfReader {
   /// Stream controller for state changes
   StreamController<UhfReaderState>? _stateStreamController;
 
+  /// Subscription for tag events from native
+  StreamSubscription? _tagEventSubscription;
+
+  /// Subscription for state events from native
+  StreamSubscription? _stateEventSubscription;
+
+  /// Whether event channels are set up
+  bool _eventChannelsSetup = false;
+
   /// Current reader state
   UhfReaderState _state = UhfReaderState.uninitialized;
 
@@ -191,6 +200,13 @@ class UhfReader {
       await _channel.invokeMethod('dispose');
       _updateState(UhfReaderState.disposed);
       
+      // Cancel native event subscriptions
+      await _tagEventSubscription?.cancel();
+      await _stateEventSubscription?.cancel();
+      _tagEventSubscription = null;
+      _stateEventSubscription = null;
+      _eventChannelsSetup = false;
+      
       await _tagStreamController?.close();
       await _stateStreamController?.close();
       _tagStreamController = null;
@@ -202,29 +218,47 @@ class UhfReader {
 
   /// Setup event channels for receiving data from native side
   void _setupEventChannels() {
-    _tagEventChannel.receiveBroadcastStream().listen(
-      (dynamic event) {
-        if (event is Map) {
-          final tag = UhfTag.fromMap(event);
-          _handleTagRead(tag);
-        }
-      },
-      onError: (dynamic error) {
-        print('Tag event error: $error');
-      },
-    );
+    // Only setup once to avoid multiple subscriptions
+    if (_eventChannelsSetup) return;
+    _eventChannelsSetup = true;
 
-    _stateEventChannel.receiveBroadcastStream().listen(
-      (dynamic event) {
-        if (event is String) {
-          final state = _parseState(event);
-          _updateState(state);
-        }
-      },
-      onError: (dynamic error) {
-        print('State event error: $error');
-      },
-    );
+    try {
+      _tagEventSubscription = _tagEventChannel.receiveBroadcastStream().listen(
+        (dynamic event) {
+          if (event is Map) {
+            try {
+              final tag = UhfTag.fromMap(event);
+              _handleTagRead(tag);
+            } catch (e) {
+              print('Error parsing tag: $e');
+            }
+          }
+        },
+        onError: (dynamic error) {
+          print('Tag event error: $error');
+        },
+        cancelOnError: false,
+      );
+    } catch (e) {
+      print('Failed to setup tag event channel: $e');
+    }
+
+    try {
+      _stateEventSubscription = _stateEventChannel.receiveBroadcastStream().listen(
+        (dynamic event) {
+          if (event is String) {
+            final state = _parseState(event);
+            _updateState(state);
+          }
+        },
+        onError: (dynamic error) {
+          print('State event error: $error');
+        },
+        cancelOnError: false,
+      );
+    } catch (e) {
+      print('Failed to setup state event channel: $e');
+    }
   }
 
   /// Handle a tag read event

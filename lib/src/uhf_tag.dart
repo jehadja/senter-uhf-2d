@@ -29,8 +29,13 @@ class UhfTag {
 
   /// Create a UhfTag from a map (used for platform channel communication)
   factory UhfTag.fromMap(Map<dynamic, dynamic> map) {
+    final epcValue = map['epc'];
+    if (epcValue == null || epcValue is! String || epcValue.isEmpty) {
+      throw ArgumentError('Invalid or missing EPC value in tag data');
+    }
+    
     return UhfTag(
-      epc: map['epc'] as String,
+      epc: epcValue,
       rssi: map['rssi'] as int?,
       frequencyKHz: map['frequencyKHz'] as int?,
       antennaId: map['antennaId'] as int?,
